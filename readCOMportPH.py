@@ -5,20 +5,9 @@ import re
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
-SERIAL_PORT = 'COM8'
+SERIAL_PORT = 'COM12'
 # be sure to set this to the same rate used on the Arduino
 SERIAL_RATE = 1200
-
-
-""" try:
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="password",
-        database="skellig_uns_lab_equipment"
-    )
-except mysql.connector.Error as err:
-    print("Something went wrong: {}".format(err)) """
 
 
 def main():
