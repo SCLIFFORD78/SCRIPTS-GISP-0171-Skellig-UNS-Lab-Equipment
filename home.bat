@@ -17,6 +17,8 @@ start python "readCOMportPH.py"
 ECHO Running program3
 start python "readCOMportConductivityMeter.py"
 ECHO Running program4
+start python "readCOMportViscometer.py"
+ECHO Running program5
 
 
 
