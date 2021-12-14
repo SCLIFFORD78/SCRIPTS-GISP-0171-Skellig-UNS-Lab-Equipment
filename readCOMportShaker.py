@@ -1,6 +1,4 @@
 import serial
-import mysql.connector
-import pymysql.cursors
 import re
 import binascii
 import time
@@ -10,7 +8,7 @@ from datetime import datetime
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
-SERIAL_PORT = 'COM11'
+SERIAL_PORT = '/dev/ttyUSB1'
 # be sure to set this to the same rate used on the Arduino
 SERIAL_RATE = 9600
 
@@ -20,7 +18,15 @@ def on_connect(client, userdata, flags, rc):
 client = mqtt.Client()
 client.username_pw_set(username="admin", password="public")
 client.on_connect = on_connect 
-client.connect("40.118.124.87", 1883, 60)
+brokerActive = False
+def connection():
+    try:
+        client.connect("52.233.241.139", 1883, 60)
+        brokerActive = True
+        return brokerActive
+    except Exception as e:
+        print(e)
+        return False
 
 speed = 0.0
 active = False
@@ -45,17 +51,23 @@ def main():
             active = True
             value_json=json.dumps({"speed":speed, "unit":'RPM',"timestamp":datetime.now().timestamp()})
             
-            client.publish("machineValues/Shaker", value_json,qos=2,retain=True)
+            client.publish("machineValues/Shaker", value_json,qos=0,retain=True)
 
         if active == True and speed == 0.0:
             
             value_json=json.dumps({"speed":speed, "unit":'RPM',"timestamp":datetime.now().timestamp()})
             
-            client.publish("machineValues/Shaker", value_json,qos=2,retain=True)
+            client.publish("machineValues/Shaker", value_json,qos=0,retain=True)
 
             active = False
 
         
+while  connection() == False:
+    print("Viscometer attempting to connect to broker")
+
+#while brokerActive == True:
+ #   main()
+
 
 if __name__ == "__main__":
     main()

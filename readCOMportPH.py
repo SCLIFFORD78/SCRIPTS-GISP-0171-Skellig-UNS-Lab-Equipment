@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
-SERIAL_PORT = 'COM12'
+SERIAL_PORT = '/dev/ttyUSB2'
 # be sure to set this to the same rate used on the Arduino
 SERIAL_RATE = 1200
 
@@ -16,7 +16,14 @@ def on_connect(client, userdata, flags, rc):
 client = mqtt.Client()
 client.username_pw_set(username="admin", password="public")
 client.on_connect = on_connect 
-client.connect("40.118.124.87", 1883, 60)
+def connection():
+    try:
+        client.connect("52.233.241.139", 1883, 60)
+        brokerActive = True
+        return brokerActive
+    except Exception as e:
+        print(e)
+        return False
 
 
 def main():
@@ -57,6 +64,13 @@ def main():
 
                 print(value)
                 print(unit)
+
+
+while  connection() == False:
+    print("Viscometer attempting to connect to broker")
+
+#while brokerActive == True:
+ #   main()
 
 
 if __name__ == "__main__":

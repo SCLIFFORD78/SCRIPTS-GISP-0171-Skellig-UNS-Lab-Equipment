@@ -1,6 +1,4 @@
 import serial
-import mysql.connector
-import pymysql.cursors
 import re
 from datetime import datetime
 import paho.mqtt.client as mqtt
@@ -8,7 +6,7 @@ import json
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
-SERIAL_PORT = 'COM13'
+SERIAL_PORT = '/dev/ttyUSB3'
 # be sure to set this to the same rate used on the Arduino
 SERIAL_RATE = 9600
 
@@ -18,7 +16,15 @@ def on_connect(client, userdata, flags, rc):
 client = mqtt.Client()
 client.username_pw_set(username="admin", password="public")
 client.on_connect = on_connect 
-client.connect("40.118.124.87", 1883, 60)
+brokerActive = False
+def connection():
+    try:
+        client.connect("52.233.241.139", 1883, 60)
+        brokerActive = True
+        return brokerActive
+    except Exception as e:
+        print(e)
+        return False
 
 
 def main():
@@ -69,16 +75,23 @@ def main():
                         date_logged = temporary[3]+' '+temporary[4]
                     else:
                         date_logged = temporary[2]+' '+temporary[3]
-                    date_logged = datetime.strptime(date_logged, '%H:%M:%S %d/%m/%y')
+                    date_logged = str(datetime.strptime(date_logged, '%H:%M:%S %d/%m/%y'))
                     
                     value_json=json.dumps({"date_logged":date_logged, "value":value, "unit": unit, "secondary_value":secondary, "secondary_unit":secondaryUnit,"timestamp":datetime.now().timestamp()})
                     
-                    client.publish("machineValues/ConductivityMeter", value_json,qos=2,retain=True)
+                    client.publish("machineValues/ConductivityMeter", value_json,qos=0,retain=True)
 
 
         except:
             print('Error processing data')
 
+
+
+while  connection() == False:
+    print("Viscometer attempting to connect to broker")
+
+#while brokerActive == True:
+ #   main()
 
 
 if __name__ == "__main__":
