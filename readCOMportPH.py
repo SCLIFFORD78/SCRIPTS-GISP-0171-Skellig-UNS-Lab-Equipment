@@ -1,13 +1,22 @@
 import serial
-import mysql.connector
-import pymysql.cursors
 import re
+import paho.mqtt.client as mqtt
+import json
+from datetime import datetime
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
 SERIAL_PORT = 'COM12'
 # be sure to set this to the same rate used on the Arduino
 SERIAL_RATE = 1200
+
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+
+client = mqtt.Client()
+client.username_pw_set(username="admin", password="public")
+client.on_connect = on_connect 
+client.connect("40.118.124.87", 1883, 60)
 
 
 def main():
@@ -41,21 +50,11 @@ def main():
                     temp = float(temp.split('F')[0])
                     temp_unit = 'F'
                 temp_device = temporary[2].rstrip()
-                # Connect to the database
-                connection = pymysql.connect(host='localhost',
-                                            user='root',
-                                            password='password',
-                                            database='skellig_uns_lab_equipment',
-                                            cursorclass=pymysql.cursors.DictCursor)
-                with connection:
-                    with connection.cursor() as cursor:
-                        # Create a new record
-                        sql = "INSERT INTO `ph_records` (`value`, `unit`, `temp`, `temp_unit`, `temp_device`) VALUES (%s, %s, %s, %s, %s)"
-                        cursor.execute(sql, (value, unit, temp, temp_unit, temp_device ))
 
-                    # connection is not autocommit by default. So you must commit to save
-                    # your changes.
-                    connection.commit()
+                value_json=json.dumps({"value":value, "unit":unit, "temp": temp, "temp_unit":temp_unit, "temp_device":temp_device,"timestamp":datetime.now().timestamp()})
+
+                client.publish("machineValues/PHmeter", value_json,qos=2,retain=True)
+
                 print(value)
                 print(unit)
 

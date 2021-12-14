@@ -3,12 +3,24 @@ import mysql.connector
 import pymysql.cursors
 import re
 from datetime import datetime
+import paho.mqtt.client as mqtt
+import json
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
 SERIAL_PORT = 'COM13'
 # be sure to set this to the same rate used on the Arduino
 SERIAL_RATE = 9600
+
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+
+client = mqtt.Client()
+client.username_pw_set(username="admin", password="public")
+client.on_connect = on_connect 
+client.connect("40.118.124.87", 1883, 60)
+
+
 def main():
     ser = serial.Serial(SERIAL_PORT, SERIAL_RATE, parity=serial.PARITY_NONE, xonxoff=True)
     while True:
@@ -58,21 +70,12 @@ def main():
                     else:
                         date_logged = temporary[2]+' '+temporary[3]
                     date_logged = datetime.strptime(date_logged, '%H:%M:%S %d/%m/%y')
-                    # Connect to the database
-                    connection = pymysql.connect(host='localhost',
-                                                user='root',
-                                                password='password',
-                                                database='skellig_uns_lab_equipment',
-                                                cursorclass=pymysql.cursors.DictCursor)
-                    with connection:
-                        with connection.cursor() as cursor:
-                            # Create a new record
-                            sql = "INSERT INTO `conductivity_records` (`date_logged`, `value`, `unit`, `secondary_value`, `secondary_unit`) VALUES (%s, %s, %s, %s, %s)"
-                            cursor.execute(sql, (date_logged, value, unit, secondary, secondaryUnit ))
+                    
+                    value_json=json.dumps({"date_logged":date_logged, "value":value, "unit": unit, "secondary_value":secondary, "secondary_unit":secondaryUnit,"timestamp":datetime.now().timestamp()})
+                    
+                    client.publish("machineValues/ConductivityMeter", value_json,qos=2,retain=True)
 
-                        # connection is not autocommit by default. So you must commit to save
-                        # your changes.
-                        connection.commit()
+
         except:
             print('Error processing data')
 

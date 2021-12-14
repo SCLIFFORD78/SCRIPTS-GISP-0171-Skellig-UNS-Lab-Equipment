@@ -3,12 +3,24 @@ import mysql.connector
 import pymysql.cursors
 import re
 from datetime import datetime
+import paho.mqtt.client as mqtt
+import json
+from datetime import datetime
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
 SERIAL_PORT = 'COM8'
 # be sure to set this to the same rate used on the Arduino
 SERIAL_RATE = 9600
+
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+
+client = mqtt.Client()
+client.username_pw_set(username="admin", password="public")
+client.on_connect = on_connect 
+client.connect("40.118.124.87", 1883, 60)
+
 def main():
     ser = serial.Serial(SERIAL_PORT, SERIAL_RATE, parity=serial.PARITY_NONE, xonxoff=False)
     temp_unit = 'C'
@@ -42,24 +54,10 @@ def main():
         temperature = float(re.split('C', re.split('=', temporary[7])[1])[0])
         Z = '00:'+ re.split('Z', temporary[8])[1]
         Z = datetime.time(datetime.strptime(Z, '%H:%M:%S'))
+        
+        value_json=json.dumps({"rpm":rpm, "M":M, "cP": cP, "D_CM2":d_CM2, "1_SEC":one_sec, "Z":Z, "temperature":temperature, "temp_unit":temp_unit, "percentage":percentage, "S": S })
 
-        # Connect to the database
-        connection = pymysql.connect(host='localhost',
-                                    user='root',
-                                    password='password',
-                                    database='skellig_uns_lab_equipment',
-                                    cursorclass=pymysql.cursors.DictCursor)
-        with connection:
-            with connection.cursor() as cursor:
-                # Create a new record
-                sql = "INSERT INTO `viscometer_records` (`rpm`,`M`, `cP`, `D_CM2`, `1_SEC`, `temperature`, `temp_unit`, `Z`, `percentage`, `S`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                cursor.execute(sql, (rpm, M, cP, d_CM2, one_sec, temperature, temp_unit, Z, percentage, S ))
-
-            # connection is not autocommit by default. So you must commit to save
-            # your changes.
-            connection.commit()
-
-
+        client.publish("machineValues/Viscometer", value_json,qos=2,retain=True)
 
 
 if __name__ == "__main__":

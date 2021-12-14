@@ -1,0 +1,2 @@
+{"value": 23.7, "unit": "pH", "temp": 19.2, "temp_unit": "c", "temp_device": "ATC", "timestamp": 1639442296.266159}
+{"value": 23.7, "unit": "pH", "temp": 19.2, "temp_unit": "c", "temp_device": "ATC", "timestamp": 1639442333.857511}
