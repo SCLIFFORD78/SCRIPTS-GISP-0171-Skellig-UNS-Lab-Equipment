@@ -1,6 +1,4 @@
 import serial
-import mysql.connector
-import pymysql.cursors
 import re
 from datetime import datetime
 import paho.mqtt.client as mqtt

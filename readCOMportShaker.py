@@ -1,8 +1,5 @@
 import serial
-import mysql.connector
-import pymysql.cursors
 import re
-import binascii
 import time
 import paho.mqtt.client as mqtt
 import json
