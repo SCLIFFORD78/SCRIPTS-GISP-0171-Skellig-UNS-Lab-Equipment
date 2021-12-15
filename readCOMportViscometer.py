@@ -19,7 +19,13 @@ def on_connect(client, userdata, flags, rc):
 client = mqtt.Client()
 client.username_pw_set(username="admin", password="public")
 client.on_connect = on_connect 
-client.connect("40.118.124.87", 1883, 60)
+def connection():
+    try:
+        client.connect("52.233.241.139", 1883, 60)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 def main():
     ser = serial.Serial(SERIAL_PORT, SERIAL_RATE, parity=serial.PARITY_NONE, xonxoff=False)
@@ -53,11 +59,18 @@ def main():
         one_sec = float(re.split('=', temporary[6])[1])
         temperature = float(re.split('C', re.split('=', temporary[7])[1])[0])
         Z = '00:'+ re.split('Z', temporary[8])[1]
-        Z = datetime.time(datetime.strptime(Z, '%H:%M:%S'))
+        Z = str(datetime.time(datetime.strptime(Z, '%H:%M:%S')))
         
         value_json=json.dumps({"rpm":rpm, "M":M, "cP": cP, "D_CM2":d_CM2, "1_SEC":one_sec, "Z":Z, "temperature":temperature, "temp_unit":temp_unit, "percentage":percentage, "S": S })
 
         client.publish("machineValues/Viscometer", value_json,qos=2,retain=True)
+
+
+while  connection() == False:
+    print("Viscometer attempting to connect to broker")
+
+#while brokerActive == True:
+ #   main()
 
 
 if __name__ == "__main__":

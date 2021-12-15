@@ -16,7 +16,13 @@ def on_connect(client, userdata, flags, rc):
 client = mqtt.Client()
 client.username_pw_set(username="admin", password="public")
 client.on_connect = on_connect 
-client.connect("40.118.124.87", 1883, 60)
+def connection():
+    try:
+        client.connect("52.233.241.139", 1883, 60)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 def main():
@@ -57,6 +63,13 @@ def main():
 
                 print(value)
                 print(unit)
+
+
+while  connection() == False:
+    print("PHmeter attempting to connect to broker")
+
+#while brokerActive == True:
+ #   main()
 
 
 if __name__ == "__main__":

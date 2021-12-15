@@ -5,7 +5,7 @@ def on_connect(client, userdata, flags, rc):
     print(f"Connected with result code {rc}")
     # subscribe, which need to put into on_connect
     # if reconnect after losing the connection with the broker, it will continue to subscribe to the raspberry/topic topic
-    client.subscribe("raspberry/#")
+    client.subscribe("machineValues/#")
 
 # the callback function, it will be triggered when receiving messages
 def on_message(client, userdata, msg):
@@ -21,7 +21,7 @@ client.will_set('raspberry/status', b'{"status": "Off"}')
 # create connection, the three parameters are broker address, broker port number, and keep-alive time respectively
 client.username_pw_set(username="admin", password="public")
 client.on_connect = on_connect 
-client.connect("40.118.124.87", 1883, 60)
+client.connect("52.233.241.139", 1883, 60)
 
 # set the network loop blocking, it will not actively end the program before calling disconnect() or the program crash
 client.loop_forever()
