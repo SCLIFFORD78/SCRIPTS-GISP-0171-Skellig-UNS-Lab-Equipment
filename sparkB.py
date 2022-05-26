@@ -24,10 +24,10 @@ import string
 from sparkplug_b import *
 
 # Application Variables
-serverUrl = "40.118.124.87"
-myGroupId = "Sparkplug B Devices"
-myNodeName = "Python Edge Node 1"
-myDeviceName = "Emulated Device"
+serverUrl = "192.168.1.23"
+myGroupId = "Colorado"
+myNodeName = "line3"
+myDeviceName = "pump1"
 publishPeriod = 5000
 myUsername = "admin"
 myPassword = "public"

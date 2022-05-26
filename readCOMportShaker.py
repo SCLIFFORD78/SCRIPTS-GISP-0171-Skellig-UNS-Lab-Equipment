@@ -48,7 +48,7 @@ def main():
             active = True
             value_json=json.dumps({"speed":speed, "unit":'RPM',"timestamp":datetime.now().timestamp()})
             
-            client.publish("machineValues/Shaker", value_json,qos=2,retain=True)
+            client.publish("machineValues/Shaker", value_json,qos=0,retain=True)
 
         if active == True and speed == 0.0:
             

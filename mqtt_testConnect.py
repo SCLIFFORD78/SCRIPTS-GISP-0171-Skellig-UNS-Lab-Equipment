@@ -28,6 +28,7 @@ client = mqtt.Client()
 
 client.username_pw_set(username="admin", password="public")
 client.on_connect = on_connect 
-client.connect("40.118.124.87", 1883, 60)
+#client.connect("40.118.124.87", 1883, 60)
+client.connect("192.168.1.23", 1883, 60)
 
 client.loop_forever()
