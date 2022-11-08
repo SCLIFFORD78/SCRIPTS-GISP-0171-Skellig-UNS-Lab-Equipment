@@ -20,6 +20,7 @@ brokerActive = False
 def connection():
     try:
         client.connect("52.233.241.139", 1883, 60)
+        client.loop_forever()
         brokerActive = True
         return brokerActive
     except Exception as e:

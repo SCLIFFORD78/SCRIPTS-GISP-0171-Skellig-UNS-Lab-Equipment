@@ -21,6 +21,7 @@ client.on_connect = on_connect
 def connection():
     try:
         client.connect("52.233.241.139", 1883, 60)
+        client.loop_forever()
         return True
     except Exception as e:
         print(e)

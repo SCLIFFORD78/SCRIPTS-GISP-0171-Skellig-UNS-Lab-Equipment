@@ -6,33 +6,40 @@ from datetime import datetime
 
 
 # this port address is for the serial tx/rx pins on the GPIO header
-SERIAL_PORT = '/dev/ttyUSB2'
+SERIAL_PORT = 'COM4'
 # be sure to set this to the same rate used on the Arduino
-SERIAL_RATE = 1200
+SERIAL_RATE = 19200
 
 def on_connect(client, userdata, flags, rc):
     print(f"Connected with result code {rc}")
 
-client = mqtt.Client()
-client.username_pw_set(username="admin", password="public")
-client.on_connect = on_connect 
-def connection():
-    try:
-        client.connect("52.233.241.139", 1883, 60)
-        client.loop_forever()
-        brokerActive = True
-        return brokerActive
-    except Exception as e:
-        print(e)
-        return False
 
 
 def main():
-    ser = serial.Serial(SERIAL_PORT, SERIAL_RATE)
+    packet = bytearray()
+    packet.append(0x02)
+    packet.append(0x03)
+    packet.append(0x00)
+    packet.append(0x40)
+
+    packet.append(0x00)
+    packet.append(0x02)
+    packet.append(0xc5)
+    packet.append(0xec)
+
+
+    message = b'\x02\x06\x00\x00\x00\x02\x08\x38'
+    message_a = list(message)
+    message_b = bytes(message_a)
+    ser = serial.Serial (SERIAL_PORT, SERIAL_RATE, parity=serial.PARITY_EVEN,stopbits=serial.STOPBITS_ONE, xonxoff=True)
+    setData = ser.write(packet)
     while True:
         # using ser.readline() assumes each line contains a single reading
         # sent using Serial.println() on the Arduino
-        reading = str(ser.readline(),'utf-8','ignore')
+        #reading = str(ser.readline(),'utf-8','ignore')
+        reading = ser.read_all()# .read(20)
+        converted = list(reading)
+        print(converted)
         # reading is a string...do whatever you want from here
         temp_unit = 'C'
         unit = 'pH'
@@ -67,8 +74,6 @@ def main():
                 print(unit)
 
 
-while  connection() == False:
-    print("Viscometer attempting to connect to broker")
 
 #while brokerActive == True:
  #   main()
